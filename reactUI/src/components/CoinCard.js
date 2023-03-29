@@ -89,7 +89,7 @@ const CoinCard = ({
   useEffect(() => {
     const getPrice = async () => {
       const { data } = await axios.get(
-        `http://localhost:5000/latestPrice/${symbol}`
+        `http://localhost:5050/latestPrice/${symbol}`
       );
 
       setCoinPrice({
@@ -104,7 +104,7 @@ const CoinCard = ({
 
     const getAggregate = async () => {
       const { data } = await axios.get(
-        `http://localhost:5000/latestAggregate/${symbol}`
+        `http://localhost:5050/latestAggregate/${symbol}`
       );
 
       setCoinAggregate({
@@ -122,7 +122,7 @@ const CoinCard = ({
     const interval = setInterval(() => {
       const getPrice = async () => {
         const { data } = await axios.get(
-          `http://localhost:5000/latestPrice/${symbol}`
+          `http://localhost:5050/latestPrice/${symbol}`
         );
 
         setCoinPrice({
@@ -137,7 +137,7 @@ const CoinCard = ({
 
       const getAggregate = async () => {
         const { data } = await axios.get(
-          `http://localhost:5000/latestAggregate/${symbol}`
+          `http://localhost:5050/latestAggregate/${symbol}`
         );
 
         setCoinAggregate({

@@ -66,7 +66,7 @@ bash start-services.sh
 
 * Wait a few minutes for the job to execute as it is downloading packages, Spark UI will be updated with master and worker when the job begins
 
-* Visit `localhost:5000` to get the data as JSON. REST Endpoints are -
+* Visit `localhost:5050` to get the data as JSON. REST Endpoints are -
     - `/latestPrice` fetches the latest price of every coin
     - `/latestPrice/symbol_coin` fetches the latest price of the selected coin.
     - Eg. `/latestPrice/BTC` fetches -

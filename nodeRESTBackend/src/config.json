@@ -2,6 +2,6 @@
     "cassandraContactPoint" : "cassandra:9042",
     "cassandraLocalDataCenter" : "datacenter1",
     "cassandraKeyspace" : "crypto_updates",
-    "serverPort" : "5000",
+    "serverPort" : "5050",
     "slideDurationSeconds" : "30"
 }

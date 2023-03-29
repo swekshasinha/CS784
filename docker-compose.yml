@@ -4,6 +4,7 @@ services:
 
     zookeeper:
         image: zookeeper:3.6.1
+        platform: linux/x86_64
         container_name: zookeeper
         hostname: zookeeper
         ports:
@@ -30,10 +31,10 @@ services:
         image: python:3-alpine
         container_name: kafka-producer
         command: >
-                sh -c "pip install -r /usr/src/producer/requirements.txt
-                && python3 /usr/src/producer/kafkaProducerService.py"
+                sh -c "pip install -r /usr/share/producer/requirements.txt
+                && python3 /usr/share/producer/kafkaProducerService.py"
         volumes:
-            - ./kafkaProducer:/usr/src/producer
+            - ./kafkaProducer:/usr/share/producer
         networks: 
             - crypto-network
       
@@ -81,7 +82,7 @@ services:
                 && sleep 30
                 && node src/server.js"
         ports:
-            - "5000:5000"
+            - "5050:5050"
         volumes:
             - ./nodeRESTBackend:/nodeBackend
         networks: 

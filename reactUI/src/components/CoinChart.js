@@ -176,7 +176,7 @@ const CoinChart = (props) => {
     const interval = setInterval(() => {
       const getPrice = async () => {
         const { data } = await axios.get(
-          `http://localhost:5000/latestPrice/${symbol}`
+          `http://localhost:5050/latestPrice/${symbol}`
         );
 
         setCoinPrice({
@@ -191,7 +191,7 @@ const CoinChart = (props) => {
 
       const getAggregate = async () => {
         const { data } = await axios.get(
-          `http://localhost:5000/latestAggregate/${symbol}`
+          `http://localhost:5050/latestAggregate/${symbol}`
         );
 
         setCoinAggregate({
