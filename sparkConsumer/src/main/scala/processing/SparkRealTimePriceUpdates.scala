@@ -24,25 +24,44 @@ class StreamingRealTimePriceUpdates(appName: String)
     .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS)
     .option("subscribe", KAFKA_TOPIC)
     .load()
+    print("=============inputDF")
+    Dataframe.collect.foreach(println)
 
   val parsedDF: DataFrame = inputDF.select(
       from_json( col("value").cast("string"), CryptoSchema.schema)
       .as("cryptoUpdate"))
       .select("cryptoUpdate.*")
+      print("=============parsedtDF")
+      Dataframe.collect.foreach(println)
 
   val castedDF: DataFrame = parsedDF
+    .printSchema();
     .withColumn("price", parsedDF("price").cast("double"))
 
   val queryPrice: StreamingQuery = castedDF
+    .printSchema();
     .writeStream
     .foreachBatch { (batchDF: DataFrame, _: Long) =>
-      batchDF.write
+      batchDF
+        .show()
+        .filter(col("symbol_coin").isNotNull).show(false)
+        .write
         .cassandraFormat("realtime_prices", "crypto_updates")
         .mode("append")
         .save()
     }
     .outputMode("update")
     .start()
+
+  val queryPriceConsole: StreamingQuery = castedDF
+    .printSchema();
+    .writeStream
+    .trigger(Trigger.ProcessingTime(interval = "1 second"))
+    .mode("append")
+    .forat( source = "console")
+    .outputMode("update")
+    .start()
+    print("=============query proce comsole  ======F")
 
   val geo_mean: GeometricMean.type = GeometricMean
   val har_mean: HarmonicMean.type = HarmonicMean
@@ -62,13 +81,17 @@ class StreamingRealTimePriceUpdates(appName: String)
   val queryAggregate: StreamingQuery = windowedDF
     .writeStream
     .foreachBatch { (batchDF: DataFrame, _: Long) =>
-      batchDF.write
+      batchDF
+        .show()
+        .filter(col("symbol_coin").isNotNull).show(false)
+        .write
         .cassandraFormat("rolling_aggregates", "crypto_updates")
         .mode("append")
         .save()
     }
     .outputMode("update")
     .start()
+    print("=============qery agggrreead===DF")
 
   spark.streams.awaitAnyTermination()
 
