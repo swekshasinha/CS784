@@ -10,12 +10,12 @@ object CryptoSchema {
     .add(name="id", DataTypes.LongType)
     .add(name="uuid", DataTypes.StringType)
     .add("number_of_markets", DataTypes.LongType)
-    .add("volume", DataTypes.LongType)
-    .add("market_cap", DataTypes.LongType)
+    .add("volume", DataTypes.StringType)
+    .add("market_cap", DataTypes.StringType)
     .add("total_supply", DataTypes.DoubleType)
     //price is casted separately to Double from String
     .add("price", DataTypes.StringType)
-    .add("percent_change_24hr", DataTypes.DoubleType)
+    .add("percent_change_24hr", DataTypes.StringType)
     .add("timestamp", DataTypes.TimestampType)
 
 }

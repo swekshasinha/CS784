@@ -26,32 +26,20 @@ class StreamingRealTimePriceUpdates(appName: String)
     .option("startingOffsets", "earliest")
     .option("subscribe", KAFKA_TOPIC)
     .load()
-    print("=============inputDF")
+    println("inputDF loaded")
 
-    val parsedDF: DataFrame = inputDF.withColumn("value",col("value").cast(DataTypes.StringType))
-      .select(from_json( col("value"), CryptoSchema.schema)
-      .as("cryptoUpdate"))
-      .select("cryptoUpdate.*")
-      print("=============parsedtDF")
-      // Dataframe.collect.foreach(println)
-
-  // val parsedDF: DataFrame = inputDF.select(
-      // from_json( col("value").cast("String"), CryptoSchema.schema
-      // val textAsString = df("text").cast(StringType)
-// val parsedDF: DataFrame = inputDF.withColumn("value",col("value").cast(DataTypes.StringType))
-      // .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-      // .as("cryptoUpdate"))
-      // .select("cryptoUpdate.*")
-      print("=============parsedtDF")
-
+  val parsedDF: DataFrame = inputDF.withColumn("value",col("value").cast(DataTypes.StringType))
+    .select(from_json( col("value"), CryptoSchema.schema)
+    .as("cryptoUpdate"))
+    .select("cryptoUpdate.*")
+    
   val printQuery = parsedDF.writeStream
       .outputMode("append")
       .format("console")
       .start()
 
-
-    // parsedDF.printSchema()
-    printQuery.awaitTermination()
+  parsedDF.printSchema()
+  printQuery.awaitTermination()
 
   val castedDF: DataFrame = parsedDF
     .withColumn("price", parsedDF("price").cast("double"))
