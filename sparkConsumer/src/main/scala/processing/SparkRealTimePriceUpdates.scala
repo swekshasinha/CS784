@@ -7,6 +7,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.streaming.StreamingQuery
 import schema.CryptoSchema
 import utilities.{GeometricMean, HarmonicMean}
+import org.apache.spark.sql.types.DataTypes
 
 object SparkRealTimePriceUpdates {
 
@@ -22,46 +23,52 @@ class StreamingRealTimePriceUpdates(appName: String)
     .readStream
     .format("kafka")
     .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS)
+    .option("startingOffsets", "earliest")
     .option("subscribe", KAFKA_TOPIC)
     .load()
     print("=============inputDF")
-    Dataframe.collect.foreach(println)
 
-  val parsedDF: DataFrame = inputDF.select(
-      from_json( col("value").cast("string"), CryptoSchema.schema)
+    val parsedDF: DataFrame = inputDF.withColumn("value",col("value").cast(DataTypes.StringType))
+      .select(from_json( col("value"), CryptoSchema.schema)
       .as("cryptoUpdate"))
       .select("cryptoUpdate.*")
       print("=============parsedtDF")
-      Dataframe.collect.foreach(println)
+      // Dataframe.collect.foreach(println)
+
+  // val parsedDF: DataFrame = inputDF.select(
+      // from_json( col("value").cast("String"), CryptoSchema.schema
+      // val textAsString = df("text").cast(StringType)
+// val parsedDF: DataFrame = inputDF.withColumn("value",col("value").cast(DataTypes.StringType))
+      // .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+      // .as("cryptoUpdate"))
+      // .select("cryptoUpdate.*")
+      print("=============parsedtDF")
+
+  val printQuery = parsedDF.writeStream
+      .outputMode("append")
+      .format("console")
+      .start()
+
+
+    // parsedDF.printSchema()
+    printQuery.awaitTermination()
 
   val castedDF: DataFrame = parsedDF
-    .printSchema();
     .withColumn("price", parsedDF("price").cast("double"))
 
   val queryPrice: StreamingQuery = castedDF
-    .printSchema();
     .writeStream
     .foreachBatch { (batchDF: DataFrame, _: Long) =>
-      batchDF
-        .show()
-        .filter(col("symbol_coin").isNotNull).show(false)
-        .write
+      print("=   show DF    = ")
+      batchDF.show()
+      batchDF.write
         .cassandraFormat("realtime_prices", "crypto_updates")
         .mode("append")
         .save()
     }
     .outputMode("update")
     .start()
-
-  val queryPriceConsole: StreamingQuery = castedDF
-    .printSchema();
-    .writeStream
-    .trigger(Trigger.ProcessingTime(interval = "1 second"))
-    .mode("append")
-    .forat( source = "console")
-    .outputMode("update")
-    .start()
-    print("=============query proce comsole  ======F")
+    print("=============query proce  ======F")
 
   val geo_mean: GeometricMean.type = GeometricMean
   val har_mean: HarmonicMean.type = HarmonicMean
@@ -81,17 +88,15 @@ class StreamingRealTimePriceUpdates(appName: String)
   val queryAggregate: StreamingQuery = windowedDF
     .writeStream
     .foreachBatch { (batchDF: DataFrame, _: Long) =>
-      batchDF
-        .show()
-        .filter(col("symbol_coin").isNotNull).show(false)
-        .write
+      batchDF.show()
+      batchDF.write
         .cassandraFormat("rolling_aggregates", "crypto_updates")
         .mode("append")
         .save()
     }
     .outputMode("update")
     .start()
-    print("=============qery agggrreead===DF")
+    print("=============qery agggrreead===w indowedDFDF")
 
   spark.streams.awaitAnyTermination()
 
@@ -100,4 +105,5 @@ class StreamingRealTimePriceUpdates(appName: String)
 object StreamingRealTimePriceUpdates{
   def apply(appName: String): StreamingRealTimePriceUpdates =
     new StreamingRealTimePriceUpdates(appName)
+    print(" done StreamingRealTimePriceUpdates")
 }

@@ -15,7 +15,8 @@ URL = PRODUCER_SETTINGS["url"]
 SLEEP_DURATION = int(PRODUCER_SETTINGS["timeout.seconds"])
 
 print("bootstrap_servers=====",KAFKA_CONFIG_SETTINGS["bootstrap_servers"])
-producer = KafkaProducer(value_serializer=lambda v: dumps(v).encode('utf-8'),
+producer = KafkaProducer(key_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                         value_serializer=lambda v: json.dumps(v).encode('utf-8'),
                          bootstrap_servers=KAFKA_CONFIG_SETTINGS["bootstrap_servers"], api_version=(0,11,5),)
 
 
@@ -27,11 +28,11 @@ def produceMessage(filteredJson):
         try:
             print("======SENDING")
             producer.send(
+                key=nameCoin,
                 topic=KAFKA_TOPIC,
                 value=coinData)
         except Exception as e:
             LOGGER.error(f"Coin : {nameCoin} has exception : {e}")
-
 
 if __name__ == "__main__":
     api = APIService()
