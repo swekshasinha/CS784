@@ -11,11 +11,11 @@ CREATE TABLE IF NOT EXISTS crypto_updates.realtime_prices(
 	id BIGINT,
 	uuid VARCHAR,
 	number_of_markets BIGINT,
-	volume BIGINT,
-	market_cap BIGINT,
+	volume VARCHAR,
+	market_cap VARCHAR,
 	total_supply DECIMAL,
 	price DECIMAL,
-	percent_change_24hr DECIMAL,
+	percent_change_24hr VARCHAR,
 	timestamp TIMESTAMP,
 	PRIMARY KEY (symbol_coin, timestamp)
 ) WITH CLUSTERING ORDER BY (timestamp DESC);
@@ -24,8 +24,7 @@ CREATE TABLE IF NOT EXISTS crypto_updates.realtime_prices(
 CREATE TABLE IF NOT EXISTS crypto_updates.rolling_aggregates(
 	symbol_coin VARCHAR,
 	arithmetic_mean DECIMAL,
-	geometric_mean DECIMAL,
-	harmonic_mean DECIMAL,
+	
 	start_time TIMESTAMP,
 	end_time TIMESTAMP,
 	PRIMARY KEY (symbol_coin, end_time)
