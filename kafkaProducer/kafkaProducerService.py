@@ -3,6 +3,7 @@ from json import dumps
 from utils import initLogger, getConfigPath, readConfigFile
 from apiService import APIService
 import time
+import sys
 import json
 
 LOGGER = initLogger("KAFKA_PRODUCER_LOG")
@@ -14,11 +15,13 @@ KAFKA_TOPIC = PRODUCER_SETTINGS["topic"]
 URL = PRODUCER_SETTINGS["url"]
 SLEEP_DURATION = int(PRODUCER_SETTINGS["timeout.seconds"])
 
-print("bootstrap_servers=====",KAFKA_CONFIG_SETTINGS["bootstrap_servers"])
+kafka_bootstrap_servers = KAFKA_CONFIG_SETTINGS["bootstrap_servers"]
+if sys.argv[1] == "local":
+    bootstrap_servers = "127.0.0.1:9092"
+print("bootstrap_servers=====",kafka_bootstrap_servers)
 producer = KafkaProducer(key_serializer=lambda v: json.dumps(v).encode('utf-8'),
                          value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-                         bootstrap_servers=KAFKA_CONFIG_SETTINGS["bootstrap_servers"], api_version=(0,11,5),)
-
+                         bootstrap_servers=kafka_bootstrap_servers, api_version=(0,11,5),)
 
 def produceMessage(filteredJson):
     # print("THE LEN IS ====", len(list(filteredJson)))
