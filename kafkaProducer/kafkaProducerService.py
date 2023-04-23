@@ -17,7 +17,7 @@ SLEEP_DURATION = int(PRODUCER_SETTINGS["timeout.seconds"])
 
 kafka_bootstrap_servers = KAFKA_CONFIG_SETTINGS["bootstrap_servers"]
 if sys.argv[1] == "local":
-    bootstrap_servers = "127.0.0.1:9092"
+    kafka_bootstrap_servers = "127.0.0.1:9092"
 print("bootstrap_servers=====",kafka_bootstrap_servers)
 producer = KafkaProducer(key_serializer=lambda v: json.dumps(v).encode('utf-8'),
                          value_serializer=lambda v: json.dumps(v).encode('utf-8'),
