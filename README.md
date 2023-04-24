@@ -311,3 +311,5 @@ npm start
 ```
 
 * Visit UI from `localhost:3000` on your browser
+
+Link to btc dataset: https://www.kaggle.com/datasets/mczielinski/bitcoin-historical-data
