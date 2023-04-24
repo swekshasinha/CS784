@@ -6,7 +6,7 @@ import org.apache.spark.sql.cassandra.DataFrameWriterWrapper
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.streaming.StreamingQuery
 import schema.CryptoSchema
-import utilities.{GeometricMean, HarmonicMean}
+import utilities.{GeometricMean, HarmonicMean, MinMaxAggregator}
 import org.apache.spark.sql.types.DataTypes
 
 object SparkRealTimePriceUpdates {
@@ -33,13 +33,13 @@ class StreamingRealTimePriceUpdates(appName: String)
     .as("cryptoUpdate"))
     .select("cryptoUpdate.*")
     
-  val printQuery = parsedDF.writeStream
-      .outputMode("append")
-      .format("console")
-      .start()
+  // val printQuery = parsedDF.writeStream
+  //     .outputMode("append")
+  //     .format("console")
+  //     .start()
 
-  parsedDF.printSchema()
-  printQuery.awaitTermination()
+  // parsedDF.printSchema()
+  // printQuery.awaitTermination()
 
   val castedDF: DataFrame = parsedDF
     .withColumn("price", parsedDF("price").cast("double"))
@@ -58,20 +58,34 @@ class StreamingRealTimePriceUpdates(appName: String)
     .start()
     print("=============query proce  ======F")
 
-  val geo_mean: GeometricMean.type = GeometricMean
-  val har_mean: HarmonicMean.type = HarmonicMean
+  // val geo_mean: GeometricMean.type = GeometricMean
+  // val har_mean: HarmonicMean.type = HarmonicMean
+  // val min_max_aggregator = new MinMaxAggregator()
+  // val min_max_aggregator: MinMaxAggregator.type = MinMaxAggregator
 
   val windowedDF: DataFrame = castedDF
     .withWatermark("timestamp", WATERMARK_THRESHOLD)
     .groupBy(
       window(col("timestamp"), WINDOW_DURATION, SLIDE_DURATION),
       col("symbol_coin"))
-    .agg(mean(col("price")).as("arithmetic_mean"),
-         geo_mean(col("price")).as("geometric_mean"),
-         har_mean(col("price")).as("harmonic_mean"))
+    .agg(mean(col("price")).as("arithmetic_mean"))
+        //  geo_mean(col("price")).as("geometric_mean"),
+        //  har_mean(col("price")).as("harmonic_mean"))
+        //  min_max_aggregator(col("price")).as("min_max"))
+    // .select(col("min_max.min").as("min"), col("min_max.max").as("max"))
     .withColumn("start_time",col("window").getField("start"))
     .withColumn("end_time",col("window").getField("end"))
     .drop("window")
+
+    print("=entering printQuery")
+
+  val printQuery = windowedDF.writeStream
+      .outputMode("complete")
+      .format("console")
+      .start()
+ print("=after printQuery")
+  windowedDF.printSchema()
+  printQuery.awaitTermination()
 
   val queryAggregate: StreamingQuery = windowedDF
     .writeStream
