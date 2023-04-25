@@ -30,8 +30,8 @@ val castedDF: DataFrame = parsedDF.withColumn("price", parsedDF("price").cast("d
 val processedDF: DataFrame = castedDF.withWatermark("timestamp", "10 seconds").groupBy(window(col("timestamp"), "5 minute", "30 seconds"), col("name_coin")).agg(min("price").as("min_price"), max("price").as("max_price"), first("price").as("open"), last("price").as("close")).withColumn("start_time",col("window").getField("start")).withColumn("end_time",col("window").getField("end")).drop("window").withColumn(
   "RoI", ($"max_price" - $"min_price") * 100.0 / $"min_price")
 
-val query = processedDF.selectExpr("to_json(struct(*)) AS value").writeStream.format("kafka").option("kafka.bootstrap.servers", "localhost:9092").option("topic", "feature_vector").option("checkpointLocation", "/tmp/checkpoint").trigger(Trigger.ProcessingTime("10 seconds")).start()
+// val printQuery = processedDF.writeStream.outputMode("append").format("console").trigger(Trigger.ProcessingTime("30 seconds")).start()
 
-query.awaitTermination()
+val kafkaOutputQuery = processedDF.selectExpr("to_json(struct(*)) AS value").writeStream.format("kafka").option("kafka.bootstrap.servers", "localhost:9092").option("topic", "feature_vector").option("checkpointLocation", "/tmp/checkpoint").trigger(Trigger.ProcessingTime("10 seconds")).start()
 
-val printQuery = min_max_DF.writeStream.outputMode("append").format("console").trigger(Trigger.ProcessingTime("30 seconds")).start()
+kafkaOutputQuery.awaitTermination()
