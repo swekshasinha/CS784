@@ -9,7 +9,7 @@ LOGGER = initLogger("API_SERVICE_LOG")
 class APIService:
     def getJson(self, url):
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers={'x-access-token': 'coinrankinge05d1206ad6a526d1e5ada3a927cf2152f6f3d470a80b59b'})
             statusCode = response.status_code
             assert statusCode == 200, f"Response status code is : {statusCode}"
             LOGGER.info("Received JSON response")
