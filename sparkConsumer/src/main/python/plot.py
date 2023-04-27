@@ -4,36 +4,16 @@ import pandas as pd
 import numpy as np
 import os
 import datetime as dt
-
-
-# Define a function to generate some random data
-def generate_data():
-    return np.random.rand()
+import json
+from threading import Thread
+from kafka import KafkaConsumer
 
 # Create a figure and an axis object
 fig, ax = plt.subplots()
 
-# Define the x-axis range
-# x_range = np.arange(0, 10, 0.1)
-
-# Initialize an empty list to store the y-axis data
-y_data = []
-x_data=[]
-global files_seen
-files_seen=[]
-path = '/Users/swekshasinha/Desktop/CS784/sparkConsumer/output_path/out_live'
-
-# line, = ax.plot(x_data, y_data)
-
-def get_files():
-    files = os.listdir(path)
-    global files_seen
-    new_files = list(set(files) - set(files_seen))
-    files_seen += new_files
-    return new_files
-
-def get_diff_df():
-    # TODO
+# Initialize an empty list to store the timeseries data
+prices = []
+timestamps=[]
 
 # Define the function to update the plot with new data
 def update(num):
@@ -90,3 +70,19 @@ ani = animation.FuncAnimation(fig, update, interval=1000)
 
 # Show the plot
 plt.show()
+
+def startKafkaConsumer():
+    consumer = KafkaConsumer(
+        'feature_vector',
+        bootstrap_servers=['localhost:9092'],
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
+        group_id='my-group',
+        value_deserializer=lambda x: json.loads(x.decode('utf-8')))
+
+    for message in consumer:
+        print(message.value)    
+
+
+if __name__ == "main":
+    startKafkaConsumer()
