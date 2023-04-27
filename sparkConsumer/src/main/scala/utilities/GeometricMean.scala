@@ -14,8 +14,8 @@ object GeometricMean extends UserDefinedAggregateFunction {
 
   // This is the internal fields you keep for computing your aggregate.
   override def bufferSchema: StructType = StructType(
-    StructField("count", LongType) ::
-      StructField("product", DoubleType) :: Nil
+    StructField("first_val", DoubleType) ::
+      StructField("second_val", DoubleType) :: Nil
   )
 
   // This is the output type of your aggregation function.
@@ -25,14 +25,18 @@ object GeometricMean extends UserDefinedAggregateFunction {
 
   // This is the initial value for your buffer schema.
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
-    buffer(0) = 0L
-    buffer(1) = 1.0
+    buffer(0) = -1.0
+    buffer(1) = -1.0
   }
 
   // This is how to update your buffer schema given an input.
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    buffer(0) = buffer.getAs[Long](0) + 1
-    buffer(1) = buffer.getAs[Double](1) * input.getAs[Double](0)
+    if (buffer(0) < 0) {
+      buffer(0) = input.getAs[Double](0)
+      buffer(1) = input.getAs[Double](0)
+    } else {
+      buffer(1) = input.getAs[Double](0)
+    }
   }
 
   // This is how to merge two objects with the bufferSchema type.

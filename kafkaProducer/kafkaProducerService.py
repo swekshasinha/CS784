@@ -40,13 +40,14 @@ def produceMessage(filteredJson):
 if __name__ == "__main__":
     api = APIService()
     while True:
+        print(URL)
         rawJson = api.getJson(URL)
-        # print(json.dumps(rawJson, indent=4))
+        print(json.dumps(rawJson, indent=4))
         temp = json.loads(json.dumps(rawJson))
         if temp:
             if "data" in temp.keys():
                 filteredJson = api.filterJson(rawJson)
-        print("ç filteredJson")
-        produceMessage(filteredJson)
-        LOGGER.info(f"Messages produced to Kafka topic : {KAFKA_TOPIC}")
+                print("filteredJson")
+                produceMessage(filteredJson)
+                LOGGER.info(f"Messages produced to Kafka topic : {KAFKA_TOPIC}")
         time.sleep(SLEEP_DURATION)
